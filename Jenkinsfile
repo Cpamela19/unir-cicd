@@ -75,15 +75,10 @@ pipeline {
         stage('E2E Tests') {
             steps {
                 sh '''
-                    docker network create calc-test-e2e || true
-        
-                    docker stop apiserver || true
-                    docker rm --force apiserver || true
-                    docker stop calc-web || true
-                    docker rm --force calc-web || true
                     docker stop e2e-tests || true
                     docker rm --force e2e-tests || true
-        
+                    
+                    docker network create calc-test-e2e || true
                     docker run -d --network calc-test-e2e \
                         --env PYTHONPATH=/opt/calc \
                         --env FLASK_APP=app/api.py \
