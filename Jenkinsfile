@@ -1,6 +1,9 @@
 pipeline {
     agent {
-        dockerfile true
+        docker {
+            image 'docker:20.10.7-dind'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
     
     stages {
