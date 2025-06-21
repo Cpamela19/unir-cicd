@@ -39,6 +39,11 @@ pipeline {
         stage('API Tests') {
             steps {
                 sh '''
+                    docker stop apiserver || true
+                    docker rm -f apiserver || true
+                    docker stop api-tests || true
+                    docker rm -f api-tests || true
+                    
                     docker network create calc-test-api || true
                     docker run -d --network calc-test-api \
                         --env PYTHONPATH=/opt/calc \
