@@ -10,6 +10,7 @@ pipeline {
             }
         }
         stage('Build') {
+            agent any
             steps {
                 echo 'Building stage!'
                 sh 'docker build -t calculator-app .'
