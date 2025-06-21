@@ -44,7 +44,24 @@ pipeline {
         }
         stage('E2E Tests') {
             steps {
-                sh 'make test-e2e'
+                sh 'docker network create calc-test-e2e || true'
+                sh 'docker stop apiserver || true'
+                sh 'docker rm --force apiserver || true'
+                sh 'docker stop calc-web || true'
+                sh 'docker rm --force calc-web || true'
+                sh 'docker stop e2e-tests || true'
+                sh 'docker rm --force e2e-tests || true'
+                sh 'docker run -d --network calc-test-e2e --env PYTHONPATH=/opt/calc --name apiserver --env FLASK_APP=app/api.py -p 5000:5000 -w /opt/calc calculator-app:latest flask run --host=0.0.0.0'
+                sh 'docker run -d --network calc-test-e2e --name calc-web -p 80:80 calc-web'
+                sh 'docker create --network calc-test-e2e --name e2e-tests cypress/included:4.9.0 --browser chrome || true'
+                sh 'docker cp ./test/e2e/cypress.json e2e-tests:/cypress.json'
+                sh 'docker cp ./test/e2e/cypress e2e-tests:/cypress'
+                sh 'docker start -a e2e-tests || true'
+                sh 'docker cp e2e-tests:/results ./  || true'
+                sh 'docker rm --force apiserver  || true'
+                sh 'docker rm --force calc-web || true'
+                sh 'docker rm --force e2e-tests || true'
+                sh 'docker network rm calc-test-e2e || true'
                 archiveArtifacts artifacts: 'results/e2e/*.xml'
             }
         }
