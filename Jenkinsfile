@@ -78,10 +78,8 @@ pipeline {
                     docker stop e2e-tests || true
                     docker rm --force e2e-tests || true
                     docker rm --force calc-web || true
-                    docker rm --force apiserver || true
-        
+                    
                     docker network create calc-test-e2e || true
-        
                     docker run -d --network calc-test-e2e \
                         --env PYTHONPATH=/opt/calc \
                         --env FLASK_APP=app/api.py \
@@ -92,14 +90,17 @@ pipeline {
         
                     docker run -d --network calc-test-e2e --name calc-web -p 8081:80 calc-web
         
-                    mkdir -p results/e2e
+                    docker create --network calc-test-e2e --name e2e-tests cypress/included:4.9.0 --browser chrome || true
         
-                    docker create --network calc-test-e2e --name e2e-tests \
-                        -v $(pwd)/test/e2e:/e2e \
-                        -v $(pwd)/results/e2e:/results/e2e \
-                        cypress/included:4.9.0 --browser chrome --config-file /e2e/cypress.json
+                    docker cp ./test/e2e/cypress.json e2e-tests:/cypress.json
+                    docker cp ./test/e2e/cypress e2e-tests:/cypress
         
+                    # Ejecuta los tests y asegura que los resultados estén en /results/e2e
                     docker start -a e2e-tests || true
+        
+                    # Asegura que la carpeta local exista y copia correctamente los resultados
+                    mkdir -p results/e2e
+                    docker cp e2e-tests:/results/e2e/. results/e2e/
         
                     docker rm --force apiserver || true
                     docker rm --force calc-web || true
