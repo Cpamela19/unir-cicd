@@ -38,15 +38,32 @@ pipeline {
         }
         stage('API Tests') {
             steps {
-                sh 'docker network create calc-test-api || true'
-                sh 'docker run -d --network calc-test-api --env PYTHONPATH=/opt/calc --name apiserver --env FLASK_APP=app/api.py -p 5000:5000 -w /opt/calc calculator-app:latest flask run --host=0.0.0.0'
-                sh 'docker run --network calc-test-api --name api-tests --env PYTHONPATH=/opt/calc --env BASE_URL=http://apiserver:5000/ -w /opt/calc calculator-app:latest pytest --junit-xml=results/api_result.xml -m api  || true'
-                sh 'docker cp api-tests:/opt/calc/results/api ./'
-                sh 'docker stop apiserver || true'
-                sh 'docker rm --force apiserver || true'
-                sh 'docker stop api-tests || true'
-                sh 'docker rm --force api-tests || true'
-                sh 'docker network rm calc-test-api || true'
+                sh '''
+                    docker network create calc-test-api || true
+                    docker run -d --network calc-test-api \
+                        --env PYTHONPATH=/opt/calc \
+                        --env FLASK_APP=app/api.py \
+                        --name apiserver \
+                        -p 5000:5000 \
+                        -w /opt/calc \
+                        calculator-app:latest flask run --host=0.0.0.0
+        
+                    docker run --network calc-test-api --name api-tests \
+                        --env PYTHONPATH=/opt/calc \
+                        --env BASE_URL=http://apiserver:5000/ \
+                        -w /opt/calc \
+                        calculator-app:latest \
+                        /bin/sh -c "mkdir -p results/api && pytest --junit-xml=results/api/api_result.xml -m api || true"
+        
+                    mkdir -p results/api
+                    docker cp api-tests:/opt/calc/results/api/. results/api/
+        
+                    docker stop apiserver || true
+                    docker rm --force apiserver || true
+                    docker stop api-tests || true
+                    docker rm --force api-tests || true
+                    docker network rm calc-test-api || true
+                '''
                 archiveArtifacts artifacts: 'results/api/*.xml'
             }
         }
