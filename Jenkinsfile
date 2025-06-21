@@ -77,6 +77,7 @@ pipeline {
                 sh '''
                     docker stop e2e-tests || true
                     docker rm --force e2e-tests || true
+                    docker rm --force calc-web || true
                     
                     docker network create calc-test-e2e || true
                     docker run -d --network calc-test-e2e \
