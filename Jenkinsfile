@@ -100,7 +100,7 @@ pipeline {
         
                     # Asegura que la carpeta local exista y copia correctamente los resultados
                     mkdir -p results/e2e
-                    docker cp e2e-tests:/results/e2e/. results/e2e/
+                    docker cp e2e-tests:/opt/calc/results/e2e/. results/e2e/
         
                     docker rm --force apiserver || true
                     docker rm --force calc-web || true
