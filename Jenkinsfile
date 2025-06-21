@@ -88,9 +88,9 @@ pipeline {
                         -w /opt/calc \
                         calculator-app:latest flask run --host=0.0.0.0
         
-                    docker run -d --network calc-test-e2e --name calc-web -p 8081:80 -w /opt/calc calc-web
+                    docker run -d --network calc-test-e2e --name calc-web -p 8081:80 calc-web
         
-                    docker create --network calc-test-e2e --name e2e-tests cypress/included:4.9.0 --browser chrome || true
+                    docker create --network calc-test-e2e --name e2e-tests -w /opt/calc cypress/included:4.9.0 --browser chrome || true
         
                     docker cp ./test/e2e/cypress.json e2e-tests:/cypress.json
                     docker cp ./test/e2e/cypress e2e-tests:/cypress
