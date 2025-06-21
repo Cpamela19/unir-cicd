@@ -4,7 +4,7 @@
   "defaultCommandTimeout": 1000,
   "reporter": "junit",
   "reporterOptions": {
-    "mochaFile": "/results/cypress_result.xml",
+    "mochaFile": "/results/e2e/cypress_result.xml",
     "toConsole": false
   }
 }
