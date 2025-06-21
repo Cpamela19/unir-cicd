@@ -22,16 +22,17 @@ pipeline {
         }
         stage('Unit tests') {
             steps {
-                sh 'docker rm -f unit-tests || true'
                 sh '''
+                    docker rm -f unit-tests || true
+                    mkdir -p results/unit
                     docker run --name unit-tests \
                         --env PYTHONPATH=/opt/calc \
                         -w /opt/calc \
                         calculator-app:latest \
                         /bin/sh -c "mkdir -p results/unit && pytest --cov --cov-report=xml:results/coverage.xml --cov-report=html:results/coverage --junit-xml=results/unit/unit_result.xml -m unit || true"
+                    docker cp unit-tests:/opt/calc/results/unit/. results/unit/
+                    docker rm unit-tests || true
                 '''
-                sh 'docker cp unit-tests:/opt/calc/results/unit ./'
-                sh 'docker rm unit-tests || true'
                 archiveArtifacts artifacts: 'results/unit/*.xml'
             }
         }
