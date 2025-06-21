@@ -12,7 +12,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building stage!'
-                sh 'make build'
+                sh 'docker build -t calculator-app .'
+                sh 'docker build -t calc-web ./web'
             }
         }
         stage('Unit tests') {
