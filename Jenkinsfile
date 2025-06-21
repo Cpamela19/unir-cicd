@@ -92,16 +92,14 @@ pipeline {
         
                     docker run -d --network calc-test-e2e --name calc-web -p 8081:80 calc-web
         
+                    mkdir -p results/e2e
+        
                     docker create --network calc-test-e2e --name e2e-tests \
                         -v $(pwd)/test/e2e:/e2e \
+                        -v $(pwd)/results/e2e:/results/e2e \
                         cypress/included:4.9.0 --browser chrome --config-file /e2e/cypress.json
         
-                    docker start e2e-tests
-                    docker exec e2e-tests mkdir -p /results/e2e
                     docker start -a e2e-tests || true
-        
-                    mkdir -p results/e2e
-                    docker cp e2e-tests:/results/e2e/. results/e2e/
         
                     docker rm --force apiserver || true
                     docker rm --force calc-web || true
